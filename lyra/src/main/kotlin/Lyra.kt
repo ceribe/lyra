@@ -1,32 +1,35 @@
-import kotlinx.serialization.PolymorphicSerializer
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.serializer
 import kotlin.reflect.KClass
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+
+data class SerDes(val serialize: (Message) -> String, val deserialize: (String) -> Message)
 
 class Lyra(private val messageSystem: MessageSystem = ZeroMQMessageSystem()) {
-    val serializers = mutableMapOf<KClass<*>, (Message) -> String>()
-    val deserializers = mutableMapOf<Int, (String) -> Message>()
+    val serdesMap = mutableMapOf<KClass<*>, SerDes>()
+    val numberToClassType = mutableMapOf<Int, KClass<*>>()
+    val classTypeToNumber = mutableMapOf<KClass<*>, Int>()
 
-    inline fun <reified T : Message> register() {
-        val serializer = MessageSerializer<T>(serializers.size)
-        serializers[T::class] = { serializer.serialize(it as T) }
-        deserializers[serializer.typeNumber] = { serializer.deserialize(it) }
+    inline fun <reified T : Message> registerMessageType() {
+        serdesMap[T::class] = SerDes({ Json.encodeToString(it as T) }, { Json.decodeFromString(it) as T })
+        val newClassNumber = numberToClassType.size
+        numberToClassType[newClassNumber] = T::class
+        classTypeToNumber[T::class] = newClassNumber
     }
 
     fun run() {
         while (true) {
             val message = messageSystem.receive()
             val typeNumber = message.substringBefore(':').toInt() // TODO
-            val deserializer = deserializers[typeNumber] ?: continue
+            val classType = numberToClassType[typeNumber] ?: continue
+            val deserializer = serdesMap[classType]?.deserialize ?: continue
             val deserializedMessage = deserializer(message)
             deserializedMessage.react()
         }
     }
 
     fun send(message: Message) {
-        val serializer = serializers[message::class] ?: return
+        val serializer = serdesMap[message::class]?.serialize ?: return
         messageSystem.send(serializer(message))
     }
 }
