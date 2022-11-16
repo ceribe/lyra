@@ -1,5 +1,3 @@
-package lyra
-
 class ZeroMQMessageSystem : MessageSystem {
     override fun send(message: String) {
         TODO("Not yet implemented")

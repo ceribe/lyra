@@ -1,5 +1,8 @@
-package lyra
-
+import kotlinx.serialization.PolymorphicSerializer
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.serializer
 import kotlin.reflect.KClass
 
 class Lyra(private val messageSystem: MessageSystem = ZeroMQMessageSystem()) {
