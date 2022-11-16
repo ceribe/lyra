@@ -2,21 +2,29 @@ import kotlinx.coroutines.channels.Channel
 
 abstract class Message {
     val channel = Channel<Unit>()
-    lateinit var lyra: Lyra
 
-    protected suspend fun waitFor(block: () -> Boolean) {
-        if (block())
-            return
-        lyra.messageQueue.add(channel to block)
-        channel.receive()
-    }
+    /**
+     * Reference to the queue which is used to synchronize "react" function calls.
+     */
+    lateinit var queue: MutableMap<Channel<Unit>, () -> Boolean>
 
     abstract suspend fun react()
 
-    suspend fun prepareAndReact(lyra: Lyra) {
-        this.lyra = lyra
-        channel.receive()
+    protected suspend fun waitFor(condition: () -> Boolean) {
+        if (condition())
+            return
+        queue[channel] = condition
+        waitForActivation()
+    }
+
+    suspend fun prepareAndReact(mainMessageQueue: MessageQueue) {
+        this.queue = mainMessageQueue.queue
+        waitForActivation()
         react()
-        lyra.messageQueue.removeIf { it.first == channel }
+        queue.remove(channel)
+    }
+
+    protected suspend fun waitForActivation() {
+        channel.receive()
     }
 }

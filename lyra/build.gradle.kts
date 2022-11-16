@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.7.21"
+    kotlin("jvm")
     kotlin("plugin.serialization") version "1.7.21"
     application
 }
@@ -10,6 +10,8 @@ version = "1.0-SNAPSHOT"
 repositories {
     mavenCentral()
 }
+
+tasks.register("prepareKotlinBuildScriptModel"){}
 
 dependencies {
     implementation(kotlin("stdlib"))
