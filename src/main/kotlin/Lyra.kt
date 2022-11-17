@@ -7,7 +7,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
-
 class Lyra(private val messageSystem: MessageSystem = ZeroMQMessageSystem()) {
     data class SerDes(val serialize: (Message) -> String, val deserialize: (String) -> Message)
     val serdesMap = mutableMapOf<KClass<*>, SerDes>()
@@ -20,22 +19,6 @@ class Lyra(private val messageSystem: MessageSystem = ZeroMQMessageSystem()) {
         val newClassNumber = numberToClassType.size
         numberToClassType[newClassNumber] = T::class
         classTypeToNumber[T::class] = newClassNumber
-    }
-
-    private fun serializeMessageWithNumber(message: Message): String? {
-        val serializer = serdesMap[message::class]?.serialize ?: return null
-        val serializedMessage = serializer(message)
-        return "${classTypeToNumber[message::class]}:$serializedMessage"
-    }
-
-    private fun sendTo(message: Message, recipient: Int) {
-        val serializedMessageWithNumber = serializeMessageWithNumber(message) ?: return
-        messageSystem.sendTo(serializedMessageWithNumber, recipient)
-    }
-
-    private fun sendToAll(message: Message) {
-        val serializedMessageWithNumber = serializeMessageWithNumber(message) ?: return
-        messageSystem.sendToAll(serializedMessageWithNumber)
     }
 
     fun run() {
@@ -79,8 +62,20 @@ class Lyra(private val messageSystem: MessageSystem = ZeroMQMessageSystem()) {
         when (messageEvent) {
             is MessageEvent.AddNewConditionEvent -> messageQueue[messageEvent.channel] = messageEvent.condition
             is MessageEvent.RemoveMessageFromQueue -> messageQueue.remove(messageEvent.channel)
-            is MessageEvent.SendToAllEvent -> sendToAll(messageEvent.message)
-            is MessageEvent.SendToEvent -> sendTo(messageEvent.message, messageEvent.recipient)
+            is MessageEvent.SendToAllEvent -> {
+                val serializedMessageWithNumber = serializeMessageWithNumber(messageEvent.message) ?: return
+                messageSystem.sendToAll(serializedMessageWithNumber)
+            }
+            is MessageEvent.SendToEvent -> {
+                val serializedMessageWithNumber = serializeMessageWithNumber(messageEvent.message) ?: return
+                messageSystem.sendTo(serializedMessageWithNumber, messageEvent.recipient)
+            }
         }
+    }
+
+    private fun serializeMessageWithNumber(message: Message): String? {
+        val serializer = serdesMap[message::class]?.serialize ?: return null
+        val serializedMessage = serializer(message)
+        return "${classTypeToNumber[message::class]}:$serializedMessage"
     }
 }

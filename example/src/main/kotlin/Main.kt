@@ -2,8 +2,8 @@ fun main() {
     val lyra = Lyra().apply {
         registerMessageType<ExampleMessage>()
     }
-    val serializer = lyra.serdesMap[ExampleMessage::class]!!.serialize
-    val message = ExampleMessage(5)
+    val message: Message = ExampleMessage(5)
+    val serializer = lyra.serdesMap[message::class]!!.serialize
     val serializedMessage = serializer(message)
     println(serializedMessage)
 

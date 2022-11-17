@@ -2,7 +2,6 @@ import kotlinx.coroutines.channels.Channel
 
 abstract class Message {
     val channel = Channel<Unit>()
-
     lateinit var onMessageEvent: (MessageEvent) -> Unit
 
     abstract suspend fun react()
