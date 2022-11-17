@@ -10,11 +10,9 @@ repositories {
     mavenCentral()
 }
 
-tasks.register("prepareKotlinBuildScriptModel"){}
-
 dependencies {
     implementation(kotlin("stdlib"))
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    api(project(":lyra"))
+    implementation(project(parent!!.path))
 }

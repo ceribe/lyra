@@ -1,3 +1,2 @@
-rootProject.name = "root"
+rootProject.name = "lyra"
 include(":example")
-include(":lyra")
