@@ -1,5 +1,9 @@
 class ZeroMQMessageSystem : MessageSystem {
-    override fun send(message: String) {
+    override fun sendTo(message: String, recipient: Int) {
+        TODO("Not yet implemented")
+    }
+
+    override fun sendToAll(message: String) {
         TODO("Not yet implemented")
     }
 

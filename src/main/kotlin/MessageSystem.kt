@@ -1,4 +1,6 @@
 interface MessageSystem {
-    fun send(message: String)
+
+    fun sendTo(message: String, recipient: Int)
+    fun sendToAll(message: String)
     fun receive(): String
 }

@@ -3,28 +3,33 @@ import kotlinx.coroutines.channels.Channel
 abstract class Message {
     val channel = Channel<Unit>()
 
-    /**
-     * Reference to the queue which is used to synchronize "react" function calls.
-     */
-    lateinit var queue: MutableMap<Channel<Unit>, () -> Boolean>
+    lateinit var onMessageEvent: (MessageEvent) -> Unit
 
     abstract suspend fun react()
 
     protected suspend fun waitFor(condition: () -> Boolean) {
         if (condition())
             return
-        queue[channel] = condition
+        onMessageEvent(MessageEvent.AddNewConditionEvent(channel, condition))
         waitForActivation()
     }
 
-    suspend fun prepareAndReact(mainMessageQueue: MessageQueue) {
-        this.queue = mainMessageQueue.queue
+    suspend fun prepareAndReact(onMessageEvent: (MessageEvent) -> Unit) {
+        this.onMessageEvent = onMessageEvent
         waitForActivation()
         react()
-        queue.remove(channel)
+        onMessageEvent(MessageEvent.RemoveMessageFromQueue(channel))
     }
 
-    protected suspend fun waitForActivation() {
+    private suspend fun waitForActivation() {
         channel.receive()
+    }
+
+    suspend fun sendToAll(message: Message) {
+        onMessageEvent(MessageEvent.SendToAllEvent(message))
+    }
+
+    suspend fun sendTo(message: Message, recipient: Int) {
+        onMessageEvent(MessageEvent.SendToEvent(message, recipient))
     }
 }
