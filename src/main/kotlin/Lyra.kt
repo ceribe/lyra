@@ -2,26 +2,20 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlin.reflect.KClass
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
+import messagesystem.MessageSystem
+import messagesystem.NodeAddress
+import messagesystem.ZeroMQMessageSystem
 
-class Lyra(private val messageSystem: MessageSystem = ZeroMQMessageSystem()) {
-    data class SerDes(val serialize: (Message) -> String, val deserialize: (String) -> Message)
-    val serdesMap = mutableMapOf<KClass<*>, SerDes>()
-    val numberToClassType = mutableMapOf<Int, KClass<*>>()
-    val classTypeToNumber = mutableMapOf<KClass<*>, Int>()
+class Lyra(
+    private val addresses: List<NodeAddress>,
+    private val messageSystem: MessageSystem = ZeroMQMessageSystem(),
+) {
+    val messageSerializer = MessageSerializer()
     private val messageQueue = MessageQueue()
 
-    inline fun <reified T : Message> registerMessageType() {
-        serdesMap[T::class] = SerDes({ Json.encodeToString(it as T) }, { Json.decodeFromString(it) as T })
-        val newClassNumber = numberToClassType.size
-        numberToClassType[newClassNumber] = T::class
-        classTypeToNumber[T::class] = newClassNumber
-    }
-
     fun run() {
+        messageSystem.setAddresses(addresses)
+        messageSystem.init()
         runBlocking {
             while (true) {
                 val incomingMessage = getNextMessage() ?: continue
@@ -33,10 +27,7 @@ class Lyra(private val messageSystem: MessageSystem = ZeroMQMessageSystem()) {
 
     private fun getNextMessage(): Message? {
         val serializedMessageWithNumber = messageSystem.receive()
-        val (typeNumber, serializedMessage) = serializedMessageWithNumber.split(":")
-        val classType = numberToClassType[typeNumber.toInt()] ?: return null
-        val deserialize = serdesMap[classType]?.deserialize ?: return null
-        return deserialize(serializedMessage)
+        return messageSerializer.deserializeMessageFromString(serializedMessageWithNumber)
     }
 
     private suspend fun reactToMessage(incomingMessage: Message, scope: CoroutineScope) {
@@ -63,19 +54,13 @@ class Lyra(private val messageSystem: MessageSystem = ZeroMQMessageSystem()) {
             is MessageEvent.AddNewConditionEvent -> messageQueue[messageEvent.channel] = messageEvent.condition
             is MessageEvent.RemoveMessageFromQueue -> messageQueue.remove(messageEvent.channel)
             is MessageEvent.SendToAllEvent -> {
-                val serializedMessageWithNumber = serializeMessageWithNumber(messageEvent.message) ?: return
+                val serializedMessageWithNumber = messageSerializer.serializeMessageToString(messageEvent.message) ?: return
                 messageSystem.sendToAll(serializedMessageWithNumber)
             }
             is MessageEvent.SendToEvent -> {
-                val serializedMessageWithNumber = serializeMessageWithNumber(messageEvent.message) ?: return
+                val serializedMessageWithNumber = messageSerializer.serializeMessageToString(messageEvent.message) ?: return
                 messageSystem.sendTo(serializedMessageWithNumber, messageEvent.recipient)
             }
         }
-    }
-
-    private fun serializeMessageWithNumber(message: Message): String? {
-        val serializer = serdesMap[message::class]?.serialize ?: return null
-        val serializedMessage = serializer(message)
-        return "${classTypeToNumber[message::class]}:$serializedMessage"
     }
 }
