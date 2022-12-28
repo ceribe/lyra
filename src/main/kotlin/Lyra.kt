@@ -3,18 +3,16 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import messagesystem.MessageSystem
-import messagesystem.NodeAddress
-import messagesystem.ZeroMQMessageSystem
+import messagesystem.zeromq.NodeAddress
+import messagesystem.zeromq.ZeroMQMessageSystem
 
 class Lyra(
-    private val addresses: List<NodeAddress>,
-    private val messageSystem: MessageSystem = ZeroMQMessageSystem(),
+    private val messageSystem: MessageSystem,
 ) {
     val messageSerializer = MessageSerializer()
     private val messageQueue = MessageQueue()
 
     fun run() {
-        messageSystem.setAddresses(addresses)
         messageSystem.init()
         runBlocking {
             while (true) {

@@ -1,5 +1,7 @@
+import messagesystem.zeromq.ZeroMQMessageSystem
+
 fun main() {
-    val lyra = Lyra(listOf())
+    val lyra = Lyra(messageSystem = ZeroMQMessageSystem(listOf()))
     lyra.messageSerializer.apply {
         registerMessageType<ExampleMessage>()
     }

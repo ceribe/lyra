@@ -1,6 +1,8 @@
-package messagesystem
+package messagesystem.zeromq
 
-class ZeroMQMessageSystem : MessageSystem {
+import messagesystem.MessageSystem
+
+class ZeroMQMessageSystem(private val addresses: List<NodeAddress>) : MessageSystem {
     override fun sendTo(message: String, recipient: Int) {
         TODO("Not yet implemented")
     }
@@ -10,10 +12,6 @@ class ZeroMQMessageSystem : MessageSystem {
     }
 
     override fun receive(): String {
-        TODO("Not yet implemented")
-    }
-
-    override fun setAddresses(addresses: List<NodeAddress>) {
         TODO("Not yet implemented")
     }
 
