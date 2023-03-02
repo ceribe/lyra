@@ -19,13 +19,15 @@ class MessageSerializer {
     fun serializeMessageToString(message: Message): String? {
         val serializer = serdesMap[message::class]?.serialize ?: return null
         val serializedMessage = serializer(message)
-        return "${classTypeToNumber[message::class]}:$serializedMessage"
+        return "${message.sender}:${classTypeToNumber[message::class]}:$serializedMessage"
     }
 
     fun deserializeMessageFromString(serializedMessageWithNumber: String): Message? {
-        val (typeNumber, serializedMessage) = serializedMessageWithNumber.split(":", limit = 2)
+        val (sender, typeNumber, serializedMessage) = serializedMessageWithNumber.split(":", limit = 3)
         val classType = numberToClassType[typeNumber.toInt()] ?: return null
         val deserialize = serdesMap[classType]?.deserialize ?: return null
-        return deserialize(serializedMessage)
+        val deserializedMessage = deserialize(serializedMessage)
+        deserializedMessage.sender = sender.toInt()
+        return deserializedMessage
     }
 }

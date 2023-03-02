@@ -1,6 +1,7 @@
 import kotlinx.coroutines.channels.Channel
 
 abstract class Message {
+    var sender: Int = -1
     val channel = Channel<Unit>()
     lateinit var onMessageEvent: (MessageEvent) -> Unit
 
