@@ -1,5 +1,6 @@
 package messagesystem.zeromq
 
+import kotlinx.coroutines.runBlocking
 import messagesystem.MessageSystem
 import org.zeromq.SocketType
 import org.zeromq.ZMQ
@@ -23,7 +24,11 @@ class ZeroMQMessageSystem(private val allNodesAddresses: List<List<NodeAddress>>
         }
 
         subSocket = context.socket(SocketType.SUB)
+        subSocket.subscribe("".toByteArray())
         allNodesAddresses.map { it[nodeNumber] }.forEach { subSocket.connect("tcp://${it}") }
+
+        // After connecting all sockets program has to wait a bit so no messages are lost
+        Thread.sleep(1000)
     }
 
     override fun sendTo(message: String, recipient: Int) {
