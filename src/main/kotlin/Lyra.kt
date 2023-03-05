@@ -26,7 +26,14 @@ class Lyra(
     }
 
     private fun sendInitMessage() {
-        messageSystem.sendTo(messageSerializer.serializeMessageToString(initMessage)!!, initNodeNumber)
+        if (nodeNumber == initNodeNumber) {
+            val serializedMessage = messageSerializer.serializeMessageToString(initMessage)
+            if (serializedMessage == null) {
+                println("Failed to serialize init message")
+                return
+            }
+            messageSystem.sendTo(serializedMessage, initNodeNumber)
+        }
     }
 
     private fun getNextMessage(): Message? {
