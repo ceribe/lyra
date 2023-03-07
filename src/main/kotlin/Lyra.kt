@@ -7,8 +7,7 @@ import messagesystem.MessageSystem
 class Lyra(
     private val messageSystem: MessageSystem,
     val nodeNumber: Int,
-    private val initMessage: Message,
-    private val initNodeNumber: Int = 0,
+    private val initMessage: Message?,
 ) {
     val messageSerializer = MessageSerializer()
     private val messageQueue = MessageQueue()
@@ -26,14 +25,15 @@ class Lyra(
     }
 
     private fun sendInitMessage() {
-        if (nodeNumber == initNodeNumber) {
-            val serializedMessage = messageSerializer.serializeMessageToString(initMessage)
-            if (serializedMessage == null) {
-                println("Failed to serialize init message")
-                return
-            }
-            messageSystem.sendTo(serializedMessage, initNodeNumber)
+        if (initMessage == null) {
+            return
         }
+        val serializedMessage = messageSerializer.serializeMessageToString(initMessage)
+        if (serializedMessage == null) {
+            println("Failed to serialize init message")
+            return
+        }
+        messageSystem.sendTo(serializedMessage, nodeNumber)
     }
 
     private fun getNextMessage(): Message? {
