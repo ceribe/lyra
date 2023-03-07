@@ -49,10 +49,15 @@ class Lyra(
     }
 
     private suspend fun checkMessageQueue() {
+        var wasAnyConditionMet = false
         messageQueue.values.forEach { (channel, waitForConditionIsMet) ->
             if (waitForConditionIsMet()) {
                 activateMessage(channel)
+                wasAnyConditionMet = true
             }
+        }
+        if (wasAnyConditionMet) {
+            checkMessageQueue()
         }
     }
 
