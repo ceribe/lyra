@@ -3,13 +3,16 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import messagesystem.MessageSystem
+import serialization.MessageSerializer
+import serialization.SerializationType
 
 class Lyra(
     private val messageSystem: MessageSystem,
     val nodeNumber: Int,
     private val initMessage: Message?,
+    serializationType: SerializationType = SerializationType.JSON
 ) {
-    val messageSerializer = MessageSerializer()
+    val messageSerializer = MessageSerializer(serializationType)
     private val messageQueue = MessageQueue()
 
     fun run() {

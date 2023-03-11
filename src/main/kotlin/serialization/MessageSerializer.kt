@@ -1,16 +1,32 @@
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
+package serialization
+
+import Message
+import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.protobuf.ProtoBuf
 import kotlin.reflect.KClass
 
-class MessageSerializer {
+class MessageSerializer(val serializationType: SerializationType) {
     data class SerDes(val serialize: (Message) -> String, val deserialize: (String) -> Message)
     val serdesMap = mutableMapOf<KClass<*>, SerDes>()
     val numberToClassType = mutableMapOf<Int, KClass<*>>()
     val classTypeToNumber = mutableMapOf<KClass<*>, Int>()
 
     inline fun <reified T : Message> registerMessageType() {
-        serdesMap[T::class] = SerDes({ Json.encodeToString(it as T) }, { Json.decodeFromString(it) as T })
+        when (serializationType) {
+            SerializationType.JSON -> {
+                serdesMap[T::class] = SerDes(
+                    serialize = { Json.encodeToString(it as T) },
+                    deserialize = { Json.decodeFromString(it) as T }
+                )
+            }
+            SerializationType.PROTOBUF -> {
+                serdesMap[T::class] = SerDes(
+                    serialize = { ProtoBuf.encodeToHexString(it as T) },
+                    deserialize = { ProtoBuf.decodeFromHexString(it) as T }
+                )
+            }
+        }
         val newClassNumber = numberToClassType.size
         numberToClassType[newClassNumber] = T::class
         classTypeToNumber[T::class] = newClassNumber
