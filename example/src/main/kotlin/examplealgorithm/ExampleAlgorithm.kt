@@ -1,3 +1,7 @@
+package examplealgorithm
+
+import Message
+
 const val N = 5
 
 object NodeState {
@@ -17,7 +21,7 @@ class InitMessage : Message() {
 }
 
 @kotlinx.serialization.Serializable
-class RequestMessage : Message() {
+class RequestMessage() : Message() {
     override suspend fun react() {
         NodeState.numberOfRequests++
         waitFor { NodeState.numberOfRequests == N }
