@@ -1,6 +1,5 @@
 package messagesystem.zeromq
 
-import kotlinx.coroutines.runBlocking
 import messagesystem.MessageSystem
 import org.zeromq.SocketType
 import org.zeromq.ZMQ
