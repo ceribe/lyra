@@ -15,6 +15,8 @@ class Lyra(
     val messageSerializer = MessageSerializer(serializationType)
     private val messageQueue = MessageQueue()
 
+    /** The node that receives initMessage should execute this method last to ensure that all other nodes are ready to receive messages
+     */
     fun run() {
         messageSystem.init(nodeNumber)
         sendInitMessage()

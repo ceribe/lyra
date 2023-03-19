@@ -4,6 +4,10 @@ import messagesystem.MessageSystem
 import java.net.ServerSocket
 import java.net.Socket
 
+/**
+ * MessageSystem implementation using sockets.
+ * @param allSocketAddresses list of addresses of all nodes in the network. Eg the first list is the address of the first node, the second list is the address of the second node, etc.
+ */
 class SocketMessageSystem(private val allSocketAddresses: List<SocketAddress>) : MessageSystem {
     private lateinit var receiveSocket: ServerSocket
 
