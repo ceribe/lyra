@@ -10,7 +10,7 @@ object NodeState {
 }
 
 fun doSomeWork() {
-    InitMessage()
+    println("Doing some work")
 }
 
 @kotlinx.serialization.Serializable
