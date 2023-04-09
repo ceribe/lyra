@@ -1,10 +1,9 @@
 package examplealgorithm
 
 import Message
+import NodeState
 
-const val N = 5
-
-object NodeState {
+class ExampleState(nodeNumber: Int): NodeState(nodeNumber) {
     var numberOfConfirmations = 0
     var numberOfRequests = 0
 }
@@ -14,17 +13,17 @@ fun doSomeWork() {
 }
 
 @kotlinx.serialization.Serializable
-class InitMessage : Message() {
+class InitMessage : Message<ExampleState>() {
     override suspend fun react() {
         sendToAll(message = RequestMessage())
     }
 }
 
 @kotlinx.serialization.Serializable
-class RequestMessage() : Message() {
+class RequestMessage : Message<ExampleState>() {
     override suspend fun react() {
-        NodeState.numberOfRequests++
-        waitFor { NodeState.numberOfRequests == N }
+        state.numberOfRequests++
+        waitFor { state.numberOfRequests == state.numberOfNodes }
         sendTo(
             message = ResponseMessage(),
             recipient = sender
@@ -33,10 +32,10 @@ class RequestMessage() : Message() {
 }
 
 @kotlinx.serialization.Serializable
-class ResponseMessage : Message() {
+class ResponseMessage : Message<ExampleState>() {
     override suspend fun react() {
-        NodeState.numberOfConfirmations++
-        if (NodeState.numberOfConfirmations < N) {
+        state.numberOfConfirmations++
+        if (state.numberOfConfirmations < state.numberOfNodes) {
             return
         }
         doSomeWork()

@@ -1,4 +1,4 @@
-package messagesystem.socketmessagesystem
+package messagesystem.socket
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -11,8 +11,8 @@ internal class SocketMessageSystemTest {
     @Test
     fun `Should send and receive message`() {
         val allNodesAddresses = listOf(
-            SocketAddress("localhost", 8001),
-            SocketAddress("localhost", 8002)
+            SocketAddress("localhost", 8005),
+            SocketAddress("localhost", 8006)
         )
         val node1 = SocketMessageSystem(allNodesAddresses)
         val node2 = SocketMessageSystem(allNodesAddresses)

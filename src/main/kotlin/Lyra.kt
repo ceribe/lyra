@@ -6,11 +6,11 @@ import messagesystem.MessageSystem
 import serialization.MessageSerializer
 import serialization.SerializationType
 
-class Lyra(
+class Lyra<T: NodeState>(
     private val messageSystem: MessageSystem,
-    val nodeNumber: Int,
-    private val initMessage: Message?,
-    serializationType: SerializationType = SerializationType.JSON
+    private val initMessage: Message<T>?,
+    serializationType: SerializationType = SerializationType.JSON,
+    private val nodeState: T
 ) {
     val messageSerializer = MessageSerializer(serializationType)
     private val messageQueue = MessageQueue()
@@ -18,11 +18,12 @@ class Lyra(
     /** The node that receives initMessage should execute this method last to ensure that all other nodes are ready to receive messages
      */
     fun run() {
-        messageSystem.init(nodeNumber)
+        nodeState.numberOfNodes = messageSystem.init(nodeState.nodeNumber)
         sendInitMessage()
         runBlocking {
             while (true) {
                 val incomingMessage = getNextMessage() ?: continue
+                incomingMessage.state = nodeState
                 reactToMessage(incomingMessage, this)
                 checkMessageQueue()
             }
@@ -38,15 +39,15 @@ class Lyra(
             println("Failed to serialize init message")
             return
         }
-        messageSystem.sendTo(serializedMessage, nodeNumber)
+        messageSystem.sendTo(serializedMessage, nodeState.nodeNumber)
     }
 
-    private fun getNextMessage(): Message? {
+    private fun getNextMessage(): Message<T>? {
         val serializedMessageWithNumber = messageSystem.receive()
-        return messageSerializer.deserializeMessageFromString(serializedMessageWithNumber)
+        return messageSerializer.deserializeMessageFromString(serializedMessageWithNumber) as Message<T>?
     }
 
-    private suspend fun reactToMessage(incomingMessage: Message, scope: CoroutineScope) {
+    private suspend fun reactToMessage(incomingMessage: Message<T>, scope: CoroutineScope) {
         scope.launch {
             incomingMessage.prepareAndReact(this@Lyra::onMessageEvent)
         }
@@ -75,12 +76,12 @@ class Lyra(
             is MessageEvent.AddNewConditionEvent -> messageQueue[messageEvent.channel] = messageEvent.condition
             is MessageEvent.RemoveMessageFromQueue -> messageQueue.remove(messageEvent.channel)
             is MessageEvent.SendToAllEvent -> {
-                messageEvent.message.sender = nodeNumber
+                messageEvent.message.sender = nodeState.nodeNumber
                 val serializedMessage = messageSerializer.serializeMessageToString(messageEvent.message) ?: return
                 messageSystem.sendToAll(serializedMessage)
             }
             is MessageEvent.SendToEvent -> {
-                messageEvent.message.sender = nodeNumber
+                messageEvent.message.sender = nodeState.nodeNumber
                 val serializedMessage = messageSerializer.serializeMessageToString(messageEvent.message) ?: return
                 messageSystem.sendTo(serializedMessage, messageEvent.recipient)
             }

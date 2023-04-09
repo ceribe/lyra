@@ -12,7 +12,7 @@ internal class MessageTest {
     private val message = TestMessage("Hello World!")
 
     @kotlinx.serialization.Serializable
-    data class TestMessage(val someString: String) : Message() {
+    data class TestMessage(val someString: String) : Message<NodeState>() {
         override suspend fun react() {
             waitFor { someCondition }
         }

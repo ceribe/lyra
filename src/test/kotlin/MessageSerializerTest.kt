@@ -5,12 +5,12 @@ import serialization.SerializationType
 internal class MessageSerializerTest {
 
     @kotlinx.serialization.Serializable
-    data class TestMessage1(val someString: String) : Message() {
+    data class TestMessage1(val someString: String) : Message<NodeState>() {
         override suspend fun react() {}
     }
     
     @kotlinx.serialization.Serializable
-    data class TestMessage2(val someString: String, val someInt: Int, val someLong: Long) : Message() {
+    data class TestMessage2(val someString: String, val someInt: Int, val someLong: Long) : Message<NodeState>() {
         override suspend fun react() {}
     }
     

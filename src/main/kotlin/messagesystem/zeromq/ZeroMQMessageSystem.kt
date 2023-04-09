@@ -12,7 +12,7 @@ class ZeroMQMessageSystem(private val allNodesAddresses: List<List<NodeAddress>>
     private lateinit var pubSockets: List<ZMQ.Socket>
     private lateinit var subSocket: ZMQ.Socket
 
-    override fun init(nodeNumber: Int) {
+    override fun init(nodeNumber: Int): Int {
         val context = ZMQ.context(1)
         val nodeAddresses = allNodesAddresses[nodeNumber]
 
@@ -28,6 +28,7 @@ class ZeroMQMessageSystem(private val allNodesAddresses: List<List<NodeAddress>>
 
         // After connecting all sockets program has to wait a bit so no messages are lost
         Thread.sleep(1000)
+        return allNodesAddresses.size
     }
 
     override fun sendTo(message: String, recipient: Int) {

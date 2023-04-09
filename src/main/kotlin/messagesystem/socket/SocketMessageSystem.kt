@@ -1,4 +1,4 @@
-package messagesystem.socketmessagesystem
+package messagesystem.socket
 
 import messagesystem.MessageSystem
 import java.net.ServerSocket
@@ -11,9 +11,10 @@ import java.net.Socket
 class SocketMessageSystem(private val allSocketAddresses: List<SocketAddress>) : MessageSystem {
     private lateinit var receiveSocket: ServerSocket
 
-    override fun init(nodeNumber: Int) {
+    override fun init(nodeNumber: Int): Int {
         val address = allSocketAddresses[nodeNumber]
         receiveSocket = ServerSocket(address.port)
+        return allSocketAddresses.size
     }
 
     override fun sendTo(message: String, recipient: Int) {

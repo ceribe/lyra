@@ -1,5 +1,5 @@
 @kotlinx.serialization.Serializable
-data class ExampleMessage(val someNumber: Int) : Message() {
+data class ExampleMessage(val someNumber: Int) : Message<NodeState>() {
     override suspend fun react() {
         // do work
         waitFor { false } // some condition

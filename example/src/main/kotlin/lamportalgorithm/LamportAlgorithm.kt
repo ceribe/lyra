@@ -1,6 +1,7 @@
 package lamportalgorithm
 
 import Message
+import NodeState
 import java.util.*
 
 data class QueueItem(val timestamp: Int, val nodeNumber: Int) : Comparable<QueueItem> {
@@ -13,12 +14,10 @@ data class QueueItem(val timestamp: Int, val nodeNumber: Int) : Comparable<Queue
     }
 }
 
-object NodeState {
+class LamportState(nodeNumber: Int): NodeState(nodeNumber) {
     val queue: PriorityQueue<QueueItem> = PriorityQueue()
     var time = 0
     var numberOfResponses = 0
-    const val numberOfNodes = 4
-    const val nodeNumber = 0
 }
 
 fun doSomeWork() {
@@ -26,42 +25,42 @@ fun doSomeWork() {
 }
 
 @kotlinx.serialization.Serializable
-class InitMessage : Message() {
+class InitMessage : Message<LamportState>() {
     override suspend fun react() {
-        sendToAll(message = RequestMessage(NodeState.time))
+        sendToAll(message = RequestMessage(state.time))
     }
 }
 
 @kotlinx.serialization.Serializable
-class RequestMessage(private val timestamp: Int) : Message() {
+class RequestMessage(private val timestamp: Int) : Message<LamportState>() {
     override suspend fun react() {
-        NodeState.queue.add(QueueItem(timestamp, sender))
+        state.queue.add(QueueItem(timestamp, sender))
         sendTo(message = ResponseMessage(), recipient = sender)
     }
 }
 
 @kotlinx.serialization.Serializable
-class ResponseMessage : Message() {
+class ResponseMessage : Message<LamportState>() {
     override suspend fun react() {
-        NodeState.numberOfResponses++
-        if (NodeState.numberOfResponses < NodeState.numberOfNodes) {
+        state.numberOfResponses++
+        if (state.numberOfResponses < state.numberOfNodes) {
             return
         }
 
-        waitFor { NodeState.queue.peek().nodeNumber == NodeState.nodeNumber }
+        waitFor { state.queue.peek().nodeNumber == state.nodeNumber }
 
         doSomeWork()
 
         sendToAll(message = ReleaseMessage())
-        NodeState.time++
-        NodeState.numberOfResponses = 0
-        sendToAll(message = RequestMessage(NodeState.time))
+        state.time++
+        state.numberOfResponses = 0
+        sendToAll(message = RequestMessage(state.time))
     }
 }
 
 @kotlinx.serialization.Serializable
-class ReleaseMessage : Message() {
+class ReleaseMessage : Message<LamportState>() {
     override suspend fun react() {
-        NodeState.queue.removeIf { it.nodeNumber == sender }
+        state.queue.removeIf { it.nodeNumber == sender }
     }
 }
