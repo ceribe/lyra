@@ -12,7 +12,7 @@ class Lyra<T: NodeState>(
     serializationType: SerializationType = SerializationType.JSON,
     private val nodeState: T
 ) {
-    val messageSerializer = MessageSerializer(serializationType)
+    val messageSerializer = MessageSerializer<T>(serializationType)
     private val messageQueue = MessageQueue()
 
     /** The node that receives initMessage should execute this method last to ensure that all other nodes are ready to receive messages

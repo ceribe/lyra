@@ -7,14 +7,14 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.protobuf.ProtoBuf
 import kotlin.reflect.KClass
 
-class MessageSerializer(val serializationType: SerializationType) {
+class MessageSerializer<K: NodeState>(val serializationType: SerializationType) {
     data class SerDes(val serialize: (Message<*>) -> String, val deserialize: (String) -> Message<*>)
 
     val serdesMap = mutableMapOf<KClass<*>, SerDes>()
     val numberToClassType = mutableMapOf<Int, KClass<*>>()
     val classTypeToNumber = mutableMapOf<KClass<*>, Int>()
 
-    inline fun <reified T : Message<*>> registerMessageType() {
+    inline fun <reified T : Message<K>> registerMessageType() {
         when (serializationType) {
             SerializationType.JSON -> {
                 serdesMap[T::class] = SerDes(

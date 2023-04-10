@@ -17,7 +17,7 @@ internal class MessageSerializerTest {
     @Test
     fun `Should serialize and deserialize message`() {
         SerializationType.values().forEach {
-            val messageSerializer = MessageSerializer(it)
+            val messageSerializer = MessageSerializer<NodeState>(it)
             messageSerializer.registerMessageType<TestMessage1>()
             messageSerializer.registerMessageType<TestMessage2>()
             val testMessage1 = TestMessage1("Hello World!")
