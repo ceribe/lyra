@@ -1,11 +1,20 @@
 import lamportalgorithm.*
+import messagesystem.zeromq.NodeAddress
 import messagesystem.zeromq.ZeroMQMessageSystem
 
-fun main() {
+fun main(args: Array<String>) {
+    val nodeNumber = args[0].toInt()
+
     val lyra = Lyra(
-        messageSystem = ZeroMQMessageSystem(listOf()),
+        messageSystem = ZeroMQMessageSystem(
+            listOf(
+                listOf(NodeAddress("192.168.0.38", 8001), NodeAddress("192.168.0.38", 8002), NodeAddress("192.168.0.38", 8003)),
+                listOf(NodeAddress("192.168.0.52", 8001), NodeAddress("192.168.0.52", 8002), NodeAddress("192.168.0.52", 8003)),
+                listOf(NodeAddress("192.168.0.18", 8001), NodeAddress("192.168.0.18", 8002), NodeAddress("192.168.0.18", 8003)),
+            )
+        ),
         initMessage = InitMessage(),
-        nodeState = LamportState(nodeNumber = 0)
+        nodeState = LamportState(nodeNumber = nodeNumber)
     )
 
     lyra.messageSerializer.apply {
