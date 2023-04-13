@@ -26,8 +26,6 @@ class ZeroMQMessageSystem(private val allNodesAddresses: List<List<NodeAddress>>
         subSocket.subscribe("".toByteArray())
         allNodesAddresses.map { it[nodeNumber] }.forEach { subSocket.connect("tcp://${it}") }
 
-        // After connecting all sockets program has to wait a bit so no messages are lost
-        Thread.sleep(1000)
         return allNodesAddresses.size
     }
 

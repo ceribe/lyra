@@ -23,7 +23,9 @@ abstract class Message<T: NodeState> {
     }
 
     private suspend fun waitForActivation() {
+//        println("Waiting for activation $channel")
         channel.receive()
+//        println("Activated message from $channel")
     }
 
     suspend fun sendToAll(message: Message<T>) {

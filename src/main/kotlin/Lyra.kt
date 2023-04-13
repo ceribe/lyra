@@ -1,4 +1,5 @@
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -6,6 +7,7 @@ import messagesystem.MessageSystem
 import serialization.MessageSerializer
 import serialization.SerializationType
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class Lyra<T: NodeState>(
     private val messageSystem: MessageSystem,
     private val initMessage: Message<T>?,
@@ -19,6 +21,9 @@ class Lyra<T: NodeState>(
      */
     fun run() {
         nodeState.numberOfNodes = messageSystem.init(nodeState.nodeNumber)
+        println("Press enter to start")
+        readLine()
+
         sendInitMessage()
         runBlocking {
             while (true) {
@@ -68,13 +73,30 @@ class Lyra<T: NodeState>(
     }
 
     private suspend fun activateMessage(channel: Channel<Unit>) {
+        if (channel.isClosedForSend) {
+            return
+        }
+//        println("[L] Activating channel $channel")
         channel.send(Unit)
+//        println("[L] Activated channel $channel")
     }
 
     private fun onMessageEvent(messageEvent: MessageEvent) {
         when (messageEvent) {
             is MessageEvent.AddNewConditionEvent -> messageQueue[messageEvent.channel] = messageEvent.condition
-            is MessageEvent.RemoveMessageFromQueue -> messageQueue.remove(messageEvent.channel)
+            is MessageEvent.RemoveMessageFromQueue ->
+            {
+                val channel = messageEvent.channel
+                // Sometimes channel can get activated after message stopped being processed, this could stop the program from working
+                if (!channel.isEmpty)
+                {
+                    runBlocking {
+                        channel.receive()
+                    }
+                }
+                channel.close()
+                messageQueue.remove(channel)
+            }
             is MessageEvent.SendToAllEvent -> {
                 messageEvent.message.sender = nodeState.nodeNumber
                 val serializedMessage = messageSerializer.serializeMessageToString(messageEvent.message) ?: return
