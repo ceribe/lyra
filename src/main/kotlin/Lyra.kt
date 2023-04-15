@@ -77,6 +77,10 @@ class Lyra<T: NodeState>(
             return
         }
 //        println("[L] Activating channel $channel")
+        // Send is doubled here to ensure that this coroutine gets suspended and waits till the message coroutine is done.
+        // Otherwise, it would be possible to activate the same message several times, which would make waitFor() not work.
+        // The second send will be received either after react() is done or after the next waitFor() is called.
+        channel.send(Unit)
         channel.send(Unit)
 //        println("[L] Activated channel $channel")
     }

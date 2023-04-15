@@ -12,6 +12,8 @@ abstract class Message<T: NodeState> {
         if (condition())
             return
         onMessageEvent(MessageEvent.AddNewConditionEvent(channel, condition))
+        // Receives the second .send() from Lyra.activateMessage()
+        channel.receive()
         waitForActivation()
     }
 
@@ -19,13 +21,16 @@ abstract class Message<T: NodeState> {
         this.onMessageEvent = onMessageEvent
         waitForActivation()
         react()
+        // Receives the second .send() from Lyra.activateMessage()
+        channel.receive()
         onMessageEvent(MessageEvent.RemoveMessageFromQueue(channel))
     }
 
     private suspend fun waitForActivation() {
-//        println("Waiting for activation $channel")
+//        println("[M] Waiting for activation $channel")
+        // Waits for the first .send() in Lyra.activateMessage()
         channel.receive()
-//        println("Activated message from $channel")
+//        println("[M] Activated message from $channel")
     }
 
     suspend fun sendToAll(message: Message<T>) {
