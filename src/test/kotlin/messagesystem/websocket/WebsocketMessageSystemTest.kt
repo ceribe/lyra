@@ -1,4 +1,4 @@
-package messagesystem.socket
+package messagesystem.websocket
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -7,16 +7,16 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import kotlin.concurrent.thread
 
-internal class SocketMessageSystemTest {
+internal class WebsocketMessageSystemTest {
 
     @Test
     fun `Should send and receive message`() {
         val allNodesAddresses = listOf(
-            SocketAddress("localhost", 8005),
-            SocketAddress("localhost", 8006)
+            WebsocketAddress("localhost", 8005),
+            WebsocketAddress("localhost", 8006)
         )
-        val node1 = SocketMessageSystem(allNodesAddresses)
-        val node2 = SocketMessageSystem(allNodesAddresses)
+        val node1 = WebsocketMessageSystem(allNodesAddresses)
+        val node2 = WebsocketMessageSystem(allNodesAddresses)
         runBlocking {
             val job1 = thread(start = true) {
                 node1.init(0)

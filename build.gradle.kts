@@ -12,6 +12,13 @@ repositories {
 }
 
 dependencies {
+    implementation("io.ktor:ktor-server-core:2.2.4")
+    implementation("io.ktor:ktor-server-netty:2.2.4")
+    implementation("io.ktor:ktor-server-websockets:2.2.4")
+    implementation("io.ktor:ktor-client-core:2.2.4")
+    implementation("io.ktor:ktor-client-cio:2.2.4")
+    implementation("io.ktor:ktor-client-websockets:2.2.4")
+
     implementation(kotlin("stdlib"))
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:1.4.1")
