@@ -12,8 +12,8 @@ internal class ZeroMQMessageSystemTest {
     @Test
     fun `Should send and receive message`() {
         val allNodesAddresses = listOf(
-            listOf(NodeAddress("localhost", 8001), NodeAddress("localhost", 8002)),
-            listOf(NodeAddress("localhost", 8003), NodeAddress("localhost", 8004))
+            listOf(ZeroMQAddress("localhost", 8001), ZeroMQAddress("localhost", 8002)),
+            listOf(ZeroMQAddress("localhost", 8003), ZeroMQAddress("localhost", 8004))
         )
         val node1 = ZeroMQMessageSystem(allNodesAddresses)
         val node2 = ZeroMQMessageSystem(allNodesAddresses)

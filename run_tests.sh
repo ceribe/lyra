@@ -22,9 +22,11 @@ while read -r line; do
     sshpass -p $2 scp nodes.txt root@$line:~/
 done < nodes.txt
 
-# Run the jar file on each node passing the node's index in nodes.txt as a parameter without waiting for the process to finish
+# Run the jar file on each node passing the node's index as a parameter without waiting for the process to finish
+index=0
 while read -r line; do
-    sshpass -p $2 ssh -n root@$line "nohup java -jar $1 $line &"
+    sshpass -p $2 ssh -n root@$line "nohup java -jar $1 $index &"
+    index=$((index+1))
 done < nodes.txt
 
 exit 0

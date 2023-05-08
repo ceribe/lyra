@@ -7,23 +7,31 @@ import messagesystem.MessageSystem
 import serialization.MessageSerializer
 import serialization.SerializationType
 
+/**
+ * Main class used to run the Lyra network of nodes. To send and receive messages it will use the provided [messageSystem].
+ * All messages are serialized before being sent and deserialized after being received using a serialization method
+ * that matches [serializationType]. During the execution given [nodeState] will be used to hold the state of the node.
+ * After initialization [synchronizeNodes] will be called to handle synchronization of nodes. All nodes should reach
+ * this function before any of them starts sending messages. After nodes are synchronized [initMessage] will be sent to
+ * this node. Each node has to run its own instance of this class.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 class Lyra<T: NodeState>(
     private val messageSystem: MessageSystem,
     private val initMessage: Message<T>?,
-    serializationType: SerializationType = SerializationType.JSON,
-    private val nodeState: T
+    private val serializationType: SerializationType = SerializationType.JSON,
+    private val nodeState: T,
+    private val synchronizeNodes: () -> Unit
 ) {
     val messageSerializer = MessageSerializer<T>(serializationType)
     private val messageQueue = MessageQueue()
 
-    /** The node that receives initMessage should execute this method last to ensure that all other nodes are ready to receive messages
+    /**
+     * Starts the execution of the node. This function will block until the node is stopped.
      */
     fun run() {
         nodeState.numberOfNodes = messageSystem.init(nodeState.nodeNumber)
-        println("Press enter to start")
-        readLine()
-
+        synchronizeNodes()
         sendInitMessage()
         runBlocking {
             while (true) {
@@ -59,6 +67,10 @@ class Lyra<T: NodeState>(
         activateMessage(incomingMessage.channel)
     }
 
+    /**
+     * Checks which messages are ready to be processed and activates them. Will call itself recursively until no more
+     * messages are ready to be processed.
+     */
     private suspend fun checkMessageQueue() {
         var wasAnyConditionMet = false
         messageQueue.values.forEach { (channel, waitForConditionIsMet) ->

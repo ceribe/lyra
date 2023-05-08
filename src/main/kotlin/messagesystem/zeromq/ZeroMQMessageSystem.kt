@@ -8,7 +8,7 @@ import org.zeromq.ZMQ
  * MessageSystem implementation using ZeroMQ.
  * @param allNodesAddresses list of lists of addresses of all nodes in the network. Eg the first list is the addresses of the first node, the second list is the addresses of the second node, etc.
  */
-class ZeroMQMessageSystem(private val allNodesAddresses: List<List<NodeAddress>>) : MessageSystem {
+class ZeroMQMessageSystem(private val allNodesAddresses: List<List<ZeroMQAddress>>) : MessageSystem {
     private lateinit var pubSockets: List<ZMQ.Socket>
     private lateinit var subSocket: ZMQ.Socket
 

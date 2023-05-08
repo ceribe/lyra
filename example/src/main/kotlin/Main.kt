@@ -1,20 +1,30 @@
 import lamportalgorithm.*
-import messagesystem.zeromq.NodeAddress
+import messagesystem.socket.SocketAddress
+import messagesystem.websocket.WebsocketAddress
+import messagesystem.zeromq.ZeroMQAddress
 import messagesystem.zeromq.ZeroMQMessageSystem
+import java.io.File
 
 fun main(args: Array<String>) {
     val nodeNumber = args[0].toInt()
 
+    //read node addresses from nodes.txt
+    val nodeAddresses = File("nodes.txt").readLines()
+
     val lyra = Lyra(
         messageSystem = ZeroMQMessageSystem(
             listOf(
-                listOf(NodeAddress("192.168.0.38", 8001), NodeAddress("192.168.0.38", 8002), NodeAddress("192.168.0.38", 8003)),
-                listOf(NodeAddress("192.168.0.52", 8001), NodeAddress("192.168.0.52", 8002), NodeAddress("192.168.0.52", 8003)),
-                listOf(NodeAddress("192.168.0.18", 8001), NodeAddress("192.168.0.18", 8002), NodeAddress("192.168.0.18", 8003)),
+                listOf(ZeroMQAddress("192.168.0.38", 8001), ZeroMQAddress("192.168.0.38", 8002), ZeroMQAddress("192.168.0.38", 8003)),
+                listOf(ZeroMQAddress("192.168.0.52", 8001), ZeroMQAddress("192.168.0.52", 8002), ZeroMQAddress("192.168.0.52", 8003)),
+                listOf(ZeroMQAddress("192.168.0.18", 8001), ZeroMQAddress("192.168.0.18", 8002), ZeroMQAddress("192.168.0.18", 8003)),
             )
         ),
         initMessage = InitMessage(),
-        nodeState = LamportState(nodeNumber = nodeNumber)
+        nodeState = LamportState(nodeNumber = nodeNumber),
+        synchronizeNodes = {
+            println("Press enter to start")
+            readLine()
+        }
     )
 
     lyra.messageSerializer.apply {
@@ -25,18 +35,22 @@ fun main(args: Array<String>) {
     }
 
     lyra.run()
-//    val message: Message = ExampleMessage(5)
-//    val serializer = lyra.messageSerializer.serdesMap[message::class]!!.serialize
-//    val serializedMessage = serializer(message)
-//    println(serializedMessage)
-//
-//    val deserializer = lyra.messageSerializer.serdesMap[ExampleMessage::class]!!.deserialize
-//    val msg = deserializer(serializedMessage)
-//    println(msg)
-//
-//    val serializedMessageWithNumber = lyra.messageSerializer.serializeMessageToString(message) ?: return
-//    println(serializedMessageWithNumber)
-//
-//    val deserializedMessage = lyra.messageSerializer.deserializeMessageFromString(serializedMessageWithNumber)
-//    println(deserializedMessage)
+}
+
+fun getSocketAddresses(nodeAddresses: List<String>): List<SocketAddress> {
+    return nodeAddresses.map { address ->
+        SocketAddress(address, 8000)
+    }
+}
+fun getWebsocketAddresses(nodeAddresses: List<String>): List<WebsocketAddress> {
+    return nodeAddresses.map { address ->
+        WebsocketAddress(address, 8000)
+    }
+}
+fun getZeroMQAddresses(nodeAddresses: List<String>): List<List<ZeroMQAddress>> {
+    return nodeAddresses.map { address ->
+        (8000..nodeAddresses.size).map {
+            ZeroMQAddress(address, it)
+        }
+    }
 }

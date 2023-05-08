@@ -16,7 +16,10 @@ import kotlinx.coroutines.channels.Channel
 
 import kotlin.concurrent.thread
 
-
+/**
+ * MessageSystem implementation using websockets.
+ * @param allSocketAddresses list of addresses of all nodes in the network. Eg the first list is the address of the first node, the second list is the address of the second node, etc.
+ */
 class WebsocketMessageSystem(private val allSocketAddresses: List<WebsocketAddress>) : MessageSystem {
     private val messagesToReceive = Channel<String>(capacity = Channel.UNLIMITED)
 
