@@ -49,7 +49,7 @@ fun getWebsocketAddresses(nodeAddresses: List<String>): List<WebsocketAddress> {
 }
 fun getZeroMQAddresses(nodeAddresses: List<String>): List<List<ZeroMQAddress>> {
     return nodeAddresses.map { address ->
-        (8000..nodeAddresses.size).map {
+        (8000 until (8000 + nodeAddresses.size)).map {
             ZeroMQAddress(address, it)
         }
     }
