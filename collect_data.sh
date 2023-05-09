@@ -10,15 +10,23 @@ if [ ! -f nodes.txt ]; then
     exit 1
 fi
 
+mkdir ~/lyra
+
 # Copy the data.txt file from each of the nodes using sshpass in silent mode. The copied files are renamed to data_<node index>.txt
 while read -r line; do
-    sshpass -p $1 scp root@$line:~/data.txt data_$line.txt
+    sshpass -p "$1" scp root@$line:~/data.txt ~/lyra/data_$line.txt
 done < nodes.txt
 
+echo "Data collected"
+
 # Zip all the data files into a file called data.zip
-zip data.zip data_*.txt
+zip data.zip ~/lyra/data_*.txt
+
+echo "Data zipped"
 
 # Remove all the data files
-rm data_*.txt
+rm ~/lyra/data_*.txt
+
+rmdir ~/lyra
 
 exit 0
