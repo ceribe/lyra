@@ -20,10 +20,12 @@ internal class WebsocketMessageSystemTest {
         runBlocking {
             val job1 = thread(start = true) {
                 node1.init(0)
+                Thread.sleep(500)
                 node1.sendTo("Hello World!", 1)
             }
             val job2 = thread(start = true) {
                 node2.init(1)
+                Thread.sleep(500)
                 val message = node2.receive()
                 assertEquals("Hello World!", message)
             }

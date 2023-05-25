@@ -19,6 +19,7 @@ internal class MessageTest {
 
         suspend fun activate() {
             channel.send(Unit)
+            channel.send(Unit)
         }
     }
 
