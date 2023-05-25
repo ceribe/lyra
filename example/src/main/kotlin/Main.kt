@@ -90,7 +90,7 @@ fun main(args: Array<String>) {
         lyra.run()
     }
     Thread.sleep(15*60*1000)
-    File("$nodeName.txt").writeText(getResult().toString())
+    println("$nodeName: ${getResult()}")
     exitProcess(0)
 }
 

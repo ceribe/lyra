@@ -38,7 +38,7 @@ class InitMessage : Message<AtomicBroadcastState>() {
 @kotlinx.serialization.Serializable
 class BroadcastMessage(private val content: String, private val uuid: String) : Message<AtomicBroadcastState>() {
     override suspend fun react() {
-        println("Got broadcast from $sender")
+//        println("Got broadcast from $sender")
         if (state.deliveredMessagesUUIDs.contains(uuid) || state.messagesToDeliver.any { it.uuid == uuid })
             return
 
@@ -56,7 +56,7 @@ class BroadcastMessage(private val content: String, private val uuid: String) : 
 @kotlinx.serialization.Serializable
 class ProposeMessage(private val proposedMessageUUID: String) : Message<AtomicBroadcastState>() {
     override suspend fun react() {
-        println("Got propose from $sender")
+//        println("Got propose from $sender")
         if (state.messagesToDeliver.any { it.uuid == proposedMessageUUID }) {
             sendTo(message = AcceptProposeMessage(proposedMessageUUID), recipient = sender)
         }
@@ -73,7 +73,7 @@ class AcceptProposeMessage(private val proposedMessageUUID: String) : Message<At
         if (proposedMessageUUID != state.proposedMessageUUID)
             return
 
-        println("Got accept propose from $sender")
+//        println("Got accept propose from $sender")
         state.numberOfAcceptMessages++
 
         if (state.numberOfAcceptMessages == state.numberOfNodes) {
@@ -95,7 +95,7 @@ class RejectProposeMessage(private val proposedMessageHash: String) : Message<At
         if (proposedMessageHash != state.proposedMessageUUID)
             return
 
-        println("Got reject propose from $sender")
+//        println("Got reject propose from $sender")
         state.setNextProposedMessageUUID()
         sendToAll(message = ProposeMessage(state.proposedMessageUUID))
     }
@@ -105,7 +105,7 @@ class RejectProposeMessage(private val proposedMessageHash: String) : Message<At
 class DeliverMessage(private val deliveredMessageHash: String) : Message<AtomicBroadcastState>() {
     override suspend fun react() {
         val messageToDeliver = state.messagesToDeliver.find { it.uuid == deliveredMessageHash }!!
-        println("Delivered message ${messageToDeliver.content} with UUID ${messageToDeliver.uuid}")
+//        println("Delivered message ${messageToDeliver.content} with UUID ${messageToDeliver.uuid}")
         state.deliveredMessagesUUIDs.add(deliveredMessageHash)
         state.messagesToDeliver.removeIf { it.uuid == deliveredMessageHash }
         state.numberOfDeliveredMessages++
