@@ -18,12 +18,7 @@ class LamportState(nodeNumber: Int): NodeState(nodeNumber) {
     val queue: PriorityQueue<QueueItem> = PriorityQueue()
     var time = 0
     var numberOfResponses = 0
-}
-
-fun doSomeWork() {
-    println("Entering critical section")
-    Thread.sleep(5000)
-    println("Exiting critical section")
+    var numberOfCriticalSectionEnters = 0L
 }
 
 @kotlinx.serialization.Serializable
@@ -54,7 +49,8 @@ class ResponseMessage : Message<LamportState>() {
 
         waitFor { state.queue.peek().nodeNumber == state.nodeNumber }
 
-        doSomeWork()
+        // Critical section
+        state.numberOfCriticalSectionEnters++
 
         sendToAll(message = ReleaseMessage())
         state.time++

@@ -24,6 +24,8 @@ class AtomicBroadcastState(nodeNumber: Int): NodeState(nodeNumber) {
 
     val isProposingAMessage: Boolean
         get() = proposedMessageUUID != ""
+
+    var numberOfDeliveredMessages = 0L
 }
 
 @kotlinx.serialization.Serializable
@@ -106,7 +108,10 @@ class DeliverMessage(private val deliveredMessageHash: String) : Message<AtomicB
         println("Delivered message ${messageToDeliver.content} with UUID ${messageToDeliver.uuid}")
         state.deliveredMessagesUUIDs.add(deliveredMessageHash)
         state.messagesToDeliver.removeIf { it.uuid == deliveredMessageHash }
+        state.numberOfDeliveredMessages++
 
-        sendToAll(message = BroadcastMessage("Hello world!", UUID.randomUUID().toString()))
+        if ((state.numberOfDeliveredMessages % state.numberOfNodes.toLong()).toInt() == state.nodeNumber) {
+            sendToAll(message = BroadcastMessage("Hello world!", UUID.randomUUID().toString()))
+        }
     }
 }
