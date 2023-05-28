@@ -38,7 +38,6 @@ class InitMessage : Message<AtomicBroadcastState>() {
 @kotlinx.serialization.Serializable
 class BroadcastMessage(private val content: String, private val uuid: String) : Message<AtomicBroadcastState>() {
     override suspend fun react() {
-//        println("Got broadcast from $sender")
         if (state.deliveredMessagesUUIDs.contains(uuid) || state.messagesToDeliver.any { it.uuid == uuid })
             return
 
@@ -56,7 +55,6 @@ class BroadcastMessage(private val content: String, private val uuid: String) : 
 @kotlinx.serialization.Serializable
 class ProposeMessage(private val proposedMessageUUID: String) : Message<AtomicBroadcastState>() {
     override suspend fun react() {
-//        println("Got propose from $sender")
         if (state.messagesToDeliver.any { it.uuid == proposedMessageUUID }) {
             sendTo(message = AcceptProposeMessage(proposedMessageUUID), recipient = sender)
         }
@@ -73,7 +71,6 @@ class AcceptProposeMessage(private val proposedMessageUUID: String) : Message<At
         if (proposedMessageUUID != state.proposedMessageUUID)
             return
 
-//        println("Got accept propose from $sender")
         state.numberOfAcceptMessages++
 
         if (state.numberOfAcceptMessages == state.numberOfNodes) {
@@ -95,7 +92,6 @@ class RejectProposeMessage(private val proposedMessageHash: String) : Message<At
         if (proposedMessageHash != state.proposedMessageUUID)
             return
 
-//        println("Got reject propose from $sender")
         state.setNextProposedMessageUUID()
         sendToAll(message = ProposeMessage(state.proposedMessageUUID))
     }
