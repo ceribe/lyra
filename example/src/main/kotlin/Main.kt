@@ -21,6 +21,7 @@ fun main(args: Array<String>) {
     val algorithmNumber = args[1].toInt()
     val messageSystemNumber = args[2].toInt()
     val serializationTypeNumber = args[3].toInt()
+    val durationMinutes = args[4].toLong()
 
     val serializationType = if (serializationTypeNumber == 0) SerializationType.JSON else SerializationType.PROTOBUF
     val messageSystem = when(messageSystemNumber) {
@@ -86,17 +87,21 @@ fun main(args: Array<String>) {
         }
     }
 
+    println("Node $nodeNumber started with algorithm $algorithmNumber, message system $messageSystemNumber and serialization type $serializationTypeNumber")
+
     thread(start = true) {
         lyra.run()
     }
-    Thread.sleep(15*60*1000)
+    Thread.sleep(durationMinutes*60*1000)
     println("$nodeName: ${getResult()}")
     exitProcess(0)
 }
 
-fun getSocketAddresses(nodeAddresses: List<String>): List<SocketAddress> {
+fun getSocketAddresses(nodeAddresses: List<String>): List<List<SocketAddress>> {
     return nodeAddresses.map { address ->
-        SocketAddress(address, 8000)
+        (8000 until (8000 + nodeAddresses.size)).map {
+            SocketAddress(address, it)
+        }
     }
 }
 fun getWebsocketAddresses(nodeAddresses: List<String>): List<WebsocketAddress> {

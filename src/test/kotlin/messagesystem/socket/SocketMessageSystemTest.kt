@@ -12,8 +12,8 @@ internal class SocketMessageSystemTest {
     @Test
     fun `Should send and receive message`() {
         val allNodesAddresses = listOf(
-            SocketAddress("localhost", 8005),
-            SocketAddress("localhost", 8006)
+            listOf(SocketAddress("localhost", 8005), SocketAddress("localhost", 8006)),
+            listOf(SocketAddress("localhost", 8007), SocketAddress("localhost", 8008))
         )
         val node1 = SocketMessageSystem(allNodesAddresses)
         val node2 = SocketMessageSystem(allNodesAddresses)

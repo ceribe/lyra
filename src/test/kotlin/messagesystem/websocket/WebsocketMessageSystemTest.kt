@@ -12,8 +12,8 @@ internal class WebsocketMessageSystemTest {
     @Test
     fun `Should send and receive message`() {
         val allNodesAddresses = listOf(
-            WebsocketAddress("localhost", 8005),
-            WebsocketAddress("localhost", 8006)
+            WebsocketAddress("localhost", 8009),
+            WebsocketAddress("localhost", 8010)
         )
         val node1 = WebsocketMessageSystem(allNodesAddresses)
         val node2 = WebsocketMessageSystem(allNodesAddresses)
