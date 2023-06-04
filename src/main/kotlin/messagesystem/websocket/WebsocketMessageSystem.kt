@@ -22,6 +22,7 @@ import kotlin.concurrent.thread
  */
 class WebsocketMessageSystem(private val allSocketAddresses: List<WebsocketAddress>) : MessageSystem {
     private val messagesToReceive = Channel<String>(capacity = Channel.UNLIMITED)
+    private val messagesToSend = mutableMapOf<Int, Channel<String>>()
 
     override fun init(nodeNumber: Int): Int {
         val address = allSocketAddresses[nodeNumber]
@@ -48,21 +49,30 @@ class WebsocketMessageSystem(private val allSocketAddresses: List<WebsocketAddre
 
     override fun sendTo(message: String, recipient: Int) {
         val recipientSocketAddress = allSocketAddresses[recipient]
-        val client = HttpClient {
-            install(io.ktor.client.plugins.websocket.WebSockets)
-        }
 
-        runBlocking {
-            client.webSocket(
-                method = HttpMethod.Get,
-                host = recipientSocketAddress.ipAddress,
-                port = recipientSocketAddress.port,
-                path = "/"
-            ) {
-                outgoing.send(Frame.Text(message))
+        if (!messagesToSend.containsKey(recipient)) {
+            messagesToSend[recipient] = Channel(capacity = Channel.UNLIMITED)
+            thread(start = true) {
+                runBlocking {
+                    val client = HttpClient {
+                        install(io.ktor.client.plugins.websocket.WebSockets)
+                    }
+                    client.webSocket(
+                        method = HttpMethod.Get,
+                        host = recipientSocketAddress.ipAddress,
+                        port = recipientSocketAddress.port,
+                        path = "/"
+                    ) {
+                        for (messageToSend in messagesToSend[recipient]!!) {
+                            send(messageToSend)
+                        }
+                    }
+                }
             }
         }
-        client.close()
+        return runBlocking {
+            messagesToSend[recipient]!!.send(message)
+        }
     }
 
     override fun sendToAll(message: String) {
