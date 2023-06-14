@@ -1,0 +1,1 @@
+Scripts in this directory were originally meant to be used for testing, but since the tests were done using SLURM they weren't needed. I'm leaving them here, because they might still be useful for testing locally.
