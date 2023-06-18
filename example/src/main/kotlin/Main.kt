@@ -52,8 +52,7 @@ fun main(args: Array<String>) {
                 serializationType = serializationType,
                 nodeState = state,
                 synchronizeNodes = { Thread.sleep(30000) }
-            )
-            lyra.messageSerializer.apply {
+            ) {
                 registerMessageType<lamportalgorithm.InitMessage>()
                 registerMessageType<RequestMessage>()
                 registerMessageType<ResponseMessage>()
@@ -70,8 +69,7 @@ fun main(args: Array<String>) {
                 serializationType = serializationType,
                 nodeState = state,
                 synchronizeNodes = { Thread.sleep(30000) }
-            )
-            lyra.messageSerializer.apply {
+            ) {
                 registerMessageType<atomicbroadcastalgorithm.InitMessage>()
                 registerMessageType<BroadcastMessage>()
                 registerMessageType<ProposeMessage>()

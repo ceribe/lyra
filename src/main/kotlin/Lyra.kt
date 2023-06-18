@@ -13,7 +13,8 @@ import serialization.SerializationType
  * that matches [serializationType]. During the execution given [nodeState] will be used to hold the state of the node.
  * After initialization [synchronizeNodes] will be called to handle synchronization of nodes. All nodes should reach
  * this function before any of them starts sending messages. After nodes are synchronized [initMessage] will be sent to
- * this node. Each node has to run its own instance of this class.
+ * this node. Each node has to run its own instance of this class. [registerMessageTypes] is used to register all
+ * message types that will be used in the network.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class Lyra<T: NodeState>(
@@ -21,11 +22,15 @@ class Lyra<T: NodeState>(
     private val initMessage: Message<T>?,
     private val serializationType: SerializationType = SerializationType.JSON,
     private val nodeState: T,
-    private val synchronizeNodes: () -> Unit
+    private val synchronizeNodes: () -> Unit,
+    registerMessageTypes: MessageSerializer<T>.() -> Unit
 ) {
-    val messageSerializer = MessageSerializer<T>(serializationType)
+    private val messageSerializer = MessageSerializer<T>(serializationType)
     private val messageQueue = MessageQueue()
 
+    init {
+        messageSerializer.registerMessageTypes()
+    }
     /**
      * Starts the execution of the node. This function will block until the node is stopped.
      */
