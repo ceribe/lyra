@@ -67,16 +67,16 @@ class ResponseMessage : Message<ExampleState>() {
 
 ```kotlin
 val lyra = Lyra(
-                messageSystem = SocketMessageSystem(...),
-                initMessage = InitMessage(),
-                serializationType = SerializationType.JSON,
-                nodeState = ExampleState(nodeNumber),
-                synchronizeNodes = { Thread.sleep(30000) }
-            ) {
-                registerMessageType<InitMessage>()
-                registerMessageType<RequestMessage>()
-                registerMessageType<ResponseMessage>()
-            }
+    messageSystem = SocketMessageSystem(...),
+    initMessage = InitMessage(),
+    serializationType = SerializationType.JSON,
+    nodeState = ExampleState(nodeNumber),
+    synchronizeNodes = { Thread.sleep(30000) }
+) {
+    registerMessageType<InitMessage>()
+    registerMessageType<RequestMessage>()
+    registerMessageType<ResponseMessage>()
+}
 lyra.run()
 ```
 
